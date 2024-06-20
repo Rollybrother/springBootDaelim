@@ -3,6 +3,13 @@
 <head>
     <title>로그인</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            if (window.location.href.indexOf('error') > -1) {
+                alert("로그인에 실패했습니다");
+            }
+        });
+    </script>
 </head>
 <body>
 <h1>로그인</h1>
