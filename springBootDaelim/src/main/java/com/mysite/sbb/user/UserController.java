@@ -1,45 +1,49 @@
 package com.mysite.sbb.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import jakarta.servlet.http.HttpSession;
-
-@ComponentScan
 @Controller
-@RequestMapping("/user")
 public class UserController {
-	
-	@Autowired
-	private UserService userService;
-	
-	@GetMapping("/login")
-    public String login() {
-        return "login_form";
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @GetMapping("/signup")
+    public String signupForm(Model model) {
+        model.addAttribute("user", new UserVO());
+        return "signup";
     }
-	
-	 @PostMapping("/loginProcess")
-	    public String loginCheck(@RequestParam String userid, @RequestParam String password, ModelMap model, HttpSession session) throws Exception {
-	        LoginVO loginVO = new LoginVO();
-	        loginVO.setUserid(userid);
-	        loginVO.setPassword(password);
 
-	        String result = "";
+    @PostMapping("/signup")
+    public String signupSubmit(@ModelAttribute UserVO user) {
+        userService.save(user, passwordEncoder);
+        return "redirect:/login";
+    }
 
-	        if (userService.loginExecute(loginVO)) {
-	            session.setAttribute("user", loginVO.getUserid());
-	            session.setAttribute("password", loginVO.getPassword());
-	            result = "redirect:/daelim/list";
-	        } else {
-	            model.addAttribute("error", true);
-	            result = "login_form";
-	        }
-	        return result;
-	    }
+    @GetMapping("/login")
+    public String loginForm() {
+        return "login";
+    }
+    
+    @GetMapping("/check-username")
+    @ResponseBody
+    public String checkUsername(@RequestParam("id") String id) {
+        boolean exists = userService.isIdTaken(id);
+        if (exists) {
+            return "사용할 수 없는 아이디입니다";
+        } else {
+            return "사용 가능한 아이디입니다";
+        }
+    }
 }

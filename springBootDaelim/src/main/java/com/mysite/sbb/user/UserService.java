@@ -1,62 +1,46 @@
 package com.mysite.sbb.user;
 
-import java.security.MessageDigest;
-import java.util.Optional;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.mysite.sbb.DataNotFoundException;
+import java.util.Optional;
 
-import lombok.RequiredArgsConstructor;
-
-@RequiredArgsConstructor
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
-	private final UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-	public boolean loginExecute(LoginVO loginVO){
-		String input_sha256U;
-		String input_sha256L;
-		String input = loginVO.getPassword().trim();
-		String Loginchk = null;
+    public UserVO save(UserVO user, PasswordEncoder passwordEncoder) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user); 
+    }
 
-		try {
-
-			MessageDigest digest = MessageDigest.getInstance("SHA-256");
-			byte[] hash = digest.digest(input.getBytes("UTF-8"));
-			StringBuffer hexString = new StringBuffer();
-
-			for (int i = 0; i < hash.length; i++) {
-				String hex = Integer.toHexString(0xff & hash[i]);
-				if (hex.length() == 1)
-					hexString.append('0');
-				hexString.append(hex);
-			}
-
-			input_sha256U = hexString.toString().toUpperCase();
-			input_sha256L = hexString.toString().toLowerCase();
-
-		} catch (Exception ex) {
-
-			throw new RuntimeException(ex);
-		}
-		boolean result = false;
-		try {
-			Loginchk = userRepository.login(loginVO.getUserid(), input_sha256U, input_sha256L);
-			if (Loginchk == null) {
-
-				result = false;
-
-			} else {
-				result = true;
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return result;
-	}
-
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<UserVO> optionalUser = userRepository.findById(username);
+        if (!optionalUser.isPresent()) {
+            throw new UsernameNotFoundException("User not found");
+        }
+        UserVO user = optionalUser.get();
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getId())
+                .password(user.getPassword())
+                .roles(user.getRole() == 1 ? "ADMIN" : "USER")
+                .build();
+    }
+    
+    public boolean isIdTaken(String id) {
+    	Optional<UserVO> result = userRepository.findById(id);
+    	if(result.equals(Optional.empty())) {
+    		return false;
+    	}else {
+    		return true;
+    	}
+    }
+    
 }

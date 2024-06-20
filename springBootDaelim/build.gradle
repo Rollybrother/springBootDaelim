@@ -60,7 +60,6 @@ dependencies {
     implementation 'mysql:mysql-connector-java:5.1.6'
 
     // AS400 JDBC 드라이버
-    //implementation 'net.sf.jt400:jt400-full:6.0'(옛날 버전의 코드입니다.)
     implementation 'net.sf.jt400:jt400:11.1'
 
     // Log4jdbc-log4j2
@@ -70,9 +69,8 @@ dependencies {
     implementation 'ch.qos.logback:logback-classic'
     
     //스프링 시큐리티 설정입니다
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-    	
+    implementation 'org.springframework.boot:spring-boot-starter-security'    	
+	
 }
 
 tasks.named('test') {

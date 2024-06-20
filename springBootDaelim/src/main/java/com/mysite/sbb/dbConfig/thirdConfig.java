@@ -23,13 +23,10 @@ import com.zaxxer.hikari.HikariDataSource;
         transactionManagerRef = "thirdTransactionManager"
 )
 public class thirdConfig {
-
     @Bean
-    @ConfigurationProperties(prefix = "spring.second-datasource")
+    @ConfigurationProperties(prefix = "spring.datasource")
     public DataSource thirdDataSource() {
-    	HikariDataSource dataSource = (HikariDataSource) DataSourceBuilder.create().build();
-        dataSource.setConnectionTestQuery("values 1");
-        return dataSource;
+    	return DataSourceBuilder.create().build();
     }
 
     @Bean
@@ -44,7 +41,7 @@ public class thirdConfig {
         em.setJpaVendorAdapter(vendorAdapter);
         
         HashMap<String, Object> prop = new HashMap<>();
-        prop.put("hibernate.dialect", "org.hibernate.dialect.SQLServerDialect");
+        prop.put("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
         prop.put("hibernate.hbm2ddl.auto", "none");
         prop.put("hibernate.format_sql", true);
         em.setJpaPropertyMap(prop);
